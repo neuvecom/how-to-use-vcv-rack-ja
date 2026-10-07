@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
     integrations: [
         starlight({
-            title: 'VCV Rack でモジュールシンセをマスター',
+            title: 'ゼロからの VCV Rack',
             defaultLocale: 'root',
             locales: {
                 root: { label: '日本語', lang: 'ja' },
