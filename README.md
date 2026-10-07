@@ -21,9 +21,9 @@ Node.js 22 以上が必要です。
 
 ```bash
 npm install
-npm run dev      # 開発サーバー（http://localhost:4321）
+npm run dev      # 開発サーバー（http://localhost:4323）
 npm run build    # 本番ビルド（dist/ に出力）
-npm run preview  # ビルド結果の確認
+npm run preview  # ビルド結果の確認（http://localhost:4323）
 ```
 
 ## 記事の追加
