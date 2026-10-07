@@ -1,48 +1,25 @@
 {
-<<<<<<< HEAD
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "cleanUrls": true,
-    "trailingSlash": true,
-    "headers": [
-      {
-        "source": "/_astro/**",
-=======
     "hosting": {
         "public": "dist",
-        "ignore": [
-            "firebase.json",
-            "**/.*",
-            "**/node_modules/**"
-        ],
+        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
         "cleanUrls": true,
         "trailingSlash": true,
->>>>>>> bb3ec683dcdb1efc5340204a1eb12fafc6f40ba5
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
-          }
+            {
+                "source": "/_astro/**",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "public, max-age=31536000, immutable"
+                    }
+                ]
+            }
         ]
-<<<<<<< HEAD
-      }
-    ]
-  },
-  "firestore": {
-    "database": "(default)",
-    "location": "asia-northeast1",
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  }
-=======
     },
     "firestore": {
-        "rules": "firestore.rules"
+        "database": "(default)",
+        "location": "asia-northeast1",
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
     }
->>>>>>> bb3ec683dcdb1efc5340204a1eb12fafc6f40ba5
 }
