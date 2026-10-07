@@ -12,7 +12,7 @@
 ## 技術構成
 
 - [Astro](https://astro.build/) + [Starlight](https://starlight.astro.build/)（Markdown で記事を書く静的サイト）
-- Firebase Hosting で公開（予定）
+- Firebase Hosting で公開（https://how-to-use-vcv-rack-ja.web.app）
 - ログインと受講の進捗管理に Firebase Authentication / Cloud Firestore を使用（予定）
 
 ## セットアップ
@@ -25,6 +25,17 @@ npm run dev      # 開発サーバー（http://localhost:4323）
 npm run build    # 本番ビルド（dist/ に出力）
 npm run preview  # ビルド結果の確認（http://localhost:4323）
 ```
+
+## 公開（デプロイ）
+
+GitHub Actions で Firebase Hosting に自動デプロイします。
+
+| タイミング | 内容 | ワークフロー |
+|---|---|---|
+| `main` へのマージ | 本番サイトへ公開 | `.github/workflows/firebase-hosting-merge.yml` |
+| PR の作成・更新 | ビルド確認と、7 日間有効なプレビュー URL の発行（PR にコメントされます） | `.github/workflows/firebase-hosting-pull-request.yml` |
+
+デプロイには、GitHub リポジトリの Secret `FIREBASE_SERVICE_ACCOUNT_HOW_TO_USE_VCV_RACK_JA` に Firebase のサービスアカウントキー（JSON）が登録されている必要があります。
 
 ## 記事の追加
 
