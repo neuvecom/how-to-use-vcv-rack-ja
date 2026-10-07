@@ -21,6 +21,7 @@ const courseLessons = courses.map((course) => ({
 <StarlightPage frontmatter={{ title: 'マイページ', description: 'あなたの学習の進み具合', tableOfContents: false }}>
     <div class="mypage" data-mypage>
         <p data-when="loading">読み込み中…</p>
+        <p data-when="error" hidden data-error></p>
         <p data-when="signed-out" hidden>
             進捗を見るには<a href="/login/">ログイン</a>してください。
         </p>
@@ -69,8 +70,21 @@ const courseLessons = courses.map((course) => ({
             show('signed-out');
             return;
         }
-        const snapshot = await getDocs(collection(db, 'users', user.uid, 'progress'));
-        const done = new Set(snapshot.docs.map((d) => d.id));
+        let done: Set<string>;
+        try {
+            const snapshot = await getDocs(collection(db, 'users', user.uid, 'progress'));
+            done = new Set(snapshot.docs.map((d) => d.id));
+        } catch (error) {
+            // 読み込みに失敗しても「読み込み中…」のまま止めず、理由を表示する
+            console.error(error);
+            const code = (error as { code?: string }).code;
+            root.querySelector<HTMLElement>('[data-error]')!.textContent =
+                code === 'permission-denied'
+                    ? '進捗を読み込む権限がありません。サイト側の設定（Firestore のルール）を確認しています。'
+                    : '進捗を読み込めませんでした。時間をおいて再読み込みしてください。';
+            show('error');
+            return;
+        }
 
         root.querySelectorAll<HTMLElement>('[data-course]').forEach((section) => {
             const items = [...section.querySelectorAll<HTMLElement>('[data-lesson]')];
