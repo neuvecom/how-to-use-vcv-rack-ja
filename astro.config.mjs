@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
+    // 他の開発サーバーと衝突しないよう、既定の 4321 から変更（dev / preview 共通）
+    server: { port: 4323 },
     integrations: [
         starlight({
             title: 'ゼロからの VCV Rack',
