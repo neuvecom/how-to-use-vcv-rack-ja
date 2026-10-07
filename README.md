@@ -1,0 +1,43 @@
+# VCV Rack でモジュールシンセをマスター
+
+無料のソフトウェア [VCV Rack](https://vcvrack.com/) を使って、モジュラーシンセサイザーの仕組みと音作りを基礎から学ぶ日本語サイトです。DTM がまったく初めての人でもわかることを目指しています。
+
+## 内容
+
+- はじめに：モジュラーシンセの考え方
+- 基本編：インストールから最初の音を出すまで
+- モジュール解説：モジュールごとの一般人向け解説
+- ワークショップ：AmbientModules の Lunar シリーズでアンビエント曲を作る
+
+## 技術構成
+
+- [Astro](https://astro.build/) + [Starlight](https://starlight.astro.build/)（Markdown で記事を書く静的サイト）
+- Firebase Hosting で公開（予定）
+- ログインと受講の進捗管理に Firebase Authentication / Cloud Firestore を使用（予定）
+
+## セットアップ
+
+Node.js 22 以上が必要です。
+
+```bash
+npm install
+npm run dev      # 開発サーバー（http://localhost:4321）
+npm run build    # 本番ビルド（dist/ に出力）
+npm run preview  # ビルド結果の確認
+```
+
+## 記事の追加
+
+`src/content/docs/` 配下に Markdown（`.md` / `.mdx`）を置くとページになります。
+
+| ディレクトリ | 内容 |
+|---|---|
+| `src/content/docs/basics/` | 基本編 |
+| `src/content/docs/modules/` | モジュール解説 |
+| `src/content/docs/workshop-lunar/` | Lunar ワークショップ |
+
+並び順は各ファイルの frontmatter の `sidebar.order` で指定します。
+
+## 開発ドキュメント
+
+計画や作業ログは `docs-dev/` にあります（サイトには公開されません）。

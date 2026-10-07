@@ -1,0 +1,16 @@
+# ビルド成果物
+dist/
+.astro/
+
+# 依存関係
+node_modules/
+
+# ログ
+npm-debug.log*
+
+# 環境変数
+.env
+.env.*
+
+# OS
+.DS_Store
