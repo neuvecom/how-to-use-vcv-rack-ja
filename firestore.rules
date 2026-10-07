@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 rules_version='2'
 
 service cloud.firestore {
@@ -13,6 +14,20 @@ service cloud.firestore {
       // else all client requests to your database will be denied until you
       // update your rules.
       allow read, write: if request.time < timestamp.date(2026, 11, 6);
+=======
+rules_version = '2';
+
+// 各ユーザーは自分の進捗だけを読み書きできる
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/progress/{lessonId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lessonId', 'completedAt'])
+        && request.resource.data.lessonId is string
+        && request.resource.data.completedAt == request.time;
+>>>>>>> bb3ec683dcdb1efc5340204a1eb12fafc6f40ba5
     }
   }
 }
