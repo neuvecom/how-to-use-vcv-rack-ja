@@ -1,0 +1,138 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'ログイン', description: 'ログインして学習の進捗を記録しましょう', tableOfContents: false }}>
+    <div class="login" data-login>
+        <p>ログインすると、レッスンごとに「完了」を記録でき、マイページで進み具合を確認できます。記事はログインしなくても読めます。</p>
+
+        <section data-when="signed-out">
+            <button type="button" class="primary" data-google>Google でログイン</button>
+
+            <h2>メールアドレスでログイン</h2>
+            <p>パスワードは不要です。入力したアドレスにログイン用のリンクを送ります。</p>
+            <form data-email-form>
+                <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+                <button type="submit">ログインリンクを送る</button>
+            </form>
+        </section>
+
+        <section data-when="signed-in" hidden>
+            <p><strong data-user-name></strong> でログインしています。</p>
+            <a class="primary" href="/mypage/">マイページへ</a>
+        </section>
+
+        <p class="message" data-message aria-live="polite"></p>
+    </div>
+</StarlightPage>
+
+<script>
+    import {
+        GoogleAuthProvider,
+        isSignInWithEmailLink,
+        onAuthStateChanged,
+        sendSignInLinkToEmail,
+        signInWithEmailLink,
+        signInWithPopup,
+    } from 'firebase/auth';
+    import { auth } from '../lib/firebase';
+
+    const EMAIL_KEY = 'emailForSignIn';
+    const root = document.querySelector<HTMLElement>('[data-login]')!;
+    const signedOut = root.querySelector<HTMLElement>('[data-when="signed-out"]')!;
+    const signedIn = root.querySelector<HTMLElement>('[data-when="signed-in"]')!;
+    const userName = root.querySelector<HTMLElement>('[data-user-name]')!;
+    const message = root.querySelector<HTMLElement>('[data-message]')!;
+
+    onAuthStateChanged(auth, (user) => {
+        signedOut.hidden = Boolean(user);
+        signedIn.hidden = !user;
+        if (user) userName.textContent = user.displayName || user.email || 'あなた';
+    });
+
+    root.querySelector('[data-google]')!.addEventListener('click', async () => {
+        message.textContent = '';
+        try {
+            await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch (error) {
+            console.error(error);
+            message.textContent = 'Google でのログインに失敗しました。もう一度お試しください。';
+        }
+    });
+
+    root.querySelector<HTMLFormElement>('[data-email-form]')!.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const email = new FormData(event.currentTarget as HTMLFormElement).get('email') as string;
+        try {
+            await sendSignInLinkToEmail(auth, email, {
+                url: `${location.origin}/login/`,
+                handleCodeInApp: true,
+            });
+            localStorage.setItem(EMAIL_KEY, email);
+            message.textContent = `${email} にログイン用のリンクを送りました。メールを開いてリンクをクリックしてください。`;
+        } catch (error) {
+            console.error(error);
+            message.textContent = 'メールを送れませんでした。アドレスを確認してもう一度お試しください。';
+        }
+    });
+
+    // メールのリンクから戻ってきたときにログインを完了する
+    if (isSignInWithEmailLink(auth, location.href)) {
+        let email = localStorage.getItem(EMAIL_KEY);
+        if (!email) {
+            // 別の端末でリンクを開いた場合はアドレスを聞き直す
+            email = prompt('確認のため、ログインに使ったメールアドレスを入力してください');
+        }
+        if (email) {
+            signInWithEmailLink(auth, email, location.href)
+                .then(() => {
+                    localStorage.removeItem(EMAIL_KEY);
+                    history.replaceState(null, '', '/login/');
+                })
+                .catch((error) => {
+                    console.error(error);
+                    message.textContent = 'リンクの有効期限が切れているか、すでに使われています。もう一度メールを送ってください。';
+                });
+        }
+    }
+</script>
+
+<style>
+    .login [hidden] {
+        display: none;
+    }
+    .login form {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .login input {
+        flex: 1 1 16rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--sl-color-gray-4);
+        border-radius: 0.5rem;
+        background: var(--sl-color-bg);
+        color: var(--sl-color-text);
+        font: inherit;
+    }
+    .login button,
+    .login a.primary {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 999rem;
+        border: 1px solid var(--sl-color-accent);
+        background: transparent;
+        color: var(--sl-color-text-accent);
+        font: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .login .primary {
+        background: var(--sl-color-accent);
+        color: var(--sl-color-black);
+    }
+    .login .message:empty {
+        display: none;
+    }
+</style>

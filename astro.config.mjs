@@ -10,6 +10,11 @@ export default defineConfig({
     integrations: [
         starlight({
             title: 'ゼロからの VCV Rack',
+            components: {
+                // ヘッダーにログイン状態、レッスン末尾に「完了」ボタンを表示する
+                SocialIcons: './src/components/AuthStatus.astro',
+                Footer: './src/components/LessonFooter.astro',
+            },
             defaultLocale: 'root',
             locales: {
                 root: { label: '日本語', lang: 'ja' },

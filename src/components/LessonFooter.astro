@@ -1,0 +1,125 @@
+---
+// レッスンページの末尾に「完了」ボタンを付ける（Starlight の Footer を置き換え）
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { isLesson } from '../lib/courses';
+
+const lessonId = Astro.locals.starlightRoute.id;
+const showProgress = isLesson(lessonId);
+---
+
+{
+    showProgress && (
+        <div class="lesson-progress" data-lesson-progress data-lesson-id={lessonId}>
+            <p data-state="signed-out" hidden>
+                <a href="/login/">ログイン</a>すると、このレッスンの完了を記録できます。
+            </p>
+            <div data-state="signed-in" hidden>
+                <button type="button" data-toggle>このレッスンを完了にする</button>
+                <span data-message aria-live="polite" />
+            </div>
+        </div>
+    )
+}
+<Default />
+
+<script>
+    import { onAuthStateChanged, type User } from 'firebase/auth';
+    import { deleteDoc, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+    import { auth, db } from '../lib/firebase';
+    import { toProgressDocId } from '../lib/courses';
+
+    const root = document.querySelector<HTMLElement>('[data-lesson-progress]');
+    if (root) {
+        const lessonId = root.dataset.lessonId!;
+        const signedOut = root.querySelector<HTMLElement>('[data-state="signed-out"]')!;
+        const signedIn = root.querySelector<HTMLElement>('[data-state="signed-in"]')!;
+        const button = root.querySelector<HTMLButtonElement>('[data-toggle]')!;
+        const message = root.querySelector<HTMLElement>('[data-message]')!;
+        let currentUser: User | null = null;
+        let completed = false;
+
+        const render = () => {
+            button.textContent = completed ? '完了を取り消す' : 'このレッスンを完了にする';
+            button.classList.toggle('done', completed);
+            message.textContent = completed ? '✓ 完了済み' : '';
+        };
+
+        const progressRef = (user: User) =>
+            doc(db, 'users', user.uid, 'progress', toProgressDocId(lessonId));
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            signedOut.hidden = Boolean(user);
+            signedIn.hidden = !user;
+            if (!user) return;
+            try {
+                completed = (await getDoc(progressRef(user))).exists();
+                render();
+            } catch (error) {
+                console.error(error);
+                message.textContent = '進捗を読み込めませんでした。';
+            }
+        });
+
+        button.addEventListener('click', async () => {
+            if (!currentUser) return;
+            button.disabled = true;
+            try {
+                if (completed) {
+                    await deleteDoc(progressRef(currentUser));
+                } else {
+                    await setDoc(progressRef(currentUser), {
+                        lessonId,
+                        completedAt: serverTimestamp(),
+                    });
+                }
+                completed = !completed;
+                render();
+            } catch (error) {
+                console.error(error);
+                message.textContent = '保存できませんでした。時間をおいて再度お試しください。';
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+</script>
+
+<style>
+    .lesson-progress {
+        margin-top: 3rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid var(--sl-color-gray-5);
+        border-radius: 0.5rem;
+    }
+    .lesson-progress [hidden] {
+        display: none;
+    }
+    .lesson-progress div {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .lesson-progress p {
+        margin: 0;
+    }
+    .lesson-progress button {
+        padding: 0.5rem 1rem;
+        border-radius: 999rem;
+        border: 1px solid var(--sl-color-accent);
+        background: var(--sl-color-accent);
+        color: var(--sl-color-black);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .lesson-progress button.done {
+        background: transparent;
+        color: var(--sl-color-text-accent);
+    }
+    .lesson-progress button:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+</style>

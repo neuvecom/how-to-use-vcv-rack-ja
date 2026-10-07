@@ -1,0 +1,63 @@
+---
+// ヘッダー右側にログイン状態を表示する（Starlight の SocialIcons を置き換え）
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+---
+
+<Default />
+<div class="auth-status" data-auth-status>
+    <a href="/login/" data-when="signed-out" hidden>ログイン</a>
+    <span data-when="signed-in" hidden>
+        <a href="/mypage/">マイページ</a>
+        <button type="button" data-sign-out>ログアウト</button>
+    </span>
+</div>
+
+<script>
+    import { onAuthStateChanged, signOut } from 'firebase/auth';
+    import { auth } from '../lib/firebase';
+
+    const root = document.querySelector<HTMLElement>('[data-auth-status]');
+    if (root) {
+        const signedOut = root.querySelector<HTMLElement>('[data-when="signed-out"]')!;
+        const signedIn = root.querySelector<HTMLElement>('[data-when="signed-in"]')!;
+        onAuthStateChanged(auth, (user) => {
+            signedOut.hidden = Boolean(user);
+            signedIn.hidden = !user;
+        });
+        root.querySelector('[data-sign-out]')?.addEventListener('click', async () => {
+            await signOut(auth);
+            location.href = '/';
+        });
+    }
+</script>
+
+<style>
+    .auth-status {
+        display: flex;
+        align-items: center;
+        font-size: var(--sl-text-sm);
+        white-space: nowrap;
+    }
+    .auth-status span {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    .auth-status [hidden] {
+        display: none;
+    }
+    .auth-status a,
+    .auth-status button {
+        color: var(--sl-color-text-accent);
+        text-decoration: none;
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+    }
+    .auth-status a:hover,
+    .auth-status button:hover {
+        color: var(--sl-color-white);
+    }
+</style>
