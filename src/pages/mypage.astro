@@ -1,0 +1,119 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection } from 'astro:content';
+import { courses, toProgressDocId } from '../lib/courses';
+
+// コースごとのレッスン一覧をビルド時に作る（並びはサイドバーと同じ order → タイトル順）
+const docs = await getCollection('docs');
+const courseLessons = courses.map((course) => ({
+    ...course,
+    lessons: docs
+        .filter((entry) => entry.id.startsWith(`${course.prefix}/`))
+        .sort(
+            (a, b) =>
+                (a.data.sidebar.order ?? Infinity) - (b.data.sidebar.order ?? Infinity) ||
+                a.data.title.localeCompare(b.data.title, 'ja')
+        )
+        .map((entry) => ({ id: entry.id, docId: toProgressDocId(entry.id), title: entry.data.title })),
+}));
+---
+
+<StarlightPage frontmatter={{ title: 'マイページ', description: 'あなたの学習の進み具合', tableOfContents: false }}>
+    <div class="mypage" data-mypage>
+        <p data-when="loading">読み込み中…</p>
+        <p data-when="signed-out" hidden>
+            進捗を見るには<a href="/login/">ログイン</a>してください。
+        </p>
+        <div data-when="signed-in" hidden>
+            {
+                courseLessons.map((course) => (
+                    <section data-course>
+                        <h2>
+                            {course.title}
+                            <span class="count" data-count data-total={course.lessons.length} />
+                        </h2>
+                        <progress max={Math.max(course.lessons.length, 1)} value="0" data-bar />
+                        {course.lessons.length === 0 ? (
+                            <p>レッスンは準備中です。</p>
+                        ) : (
+                            <ul>
+                                {course.lessons.map((lesson) => (
+                                    <li data-lesson={lesson.docId}>
+                                        <span class="mark" aria-hidden="true">○</span>
+                                        <a href={`/${lesson.id}/`}>{lesson.title}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+                ))
+            }
+        </div>
+    </div>
+</StarlightPage>
+
+<script>
+    import { onAuthStateChanged } from 'firebase/auth';
+    import { collection, getDocs } from 'firebase/firestore';
+    import { auth, db } from '../lib/firebase';
+
+    const root = document.querySelector<HTMLElement>('[data-mypage]')!;
+    const show = (state: string) => {
+        root.querySelectorAll<HTMLElement>('[data-when]').forEach((el) => {
+            el.hidden = el.dataset.when !== state;
+        });
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            show('signed-out');
+            return;
+        }
+        const snapshot = await getDocs(collection(db, 'users', user.uid, 'progress'));
+        const done = new Set(snapshot.docs.map((d) => d.id));
+
+        root.querySelectorAll<HTMLElement>('[data-course]').forEach((section) => {
+            const items = [...section.querySelectorAll<HTMLElement>('[data-lesson]')];
+            let count = 0;
+            items.forEach((item) => {
+                const isDone = done.has(item.dataset.lesson!);
+                if (isDone) count++;
+                item.classList.toggle('done', isDone);
+                item.querySelector('.mark')!.textContent = isDone ? '✓' : '○';
+            });
+            const counter = section.querySelector<HTMLElement>('[data-count]')!;
+            counter.textContent = `${count} / ${counter.dataset.total} 完了`;
+            section.querySelector<HTMLProgressElement>('[data-bar]')!.value = count;
+        });
+        show('signed-in');
+    });
+</script>
+
+<style>
+    .mypage [hidden] {
+        display: none;
+    }
+    .mypage .count {
+        margin-inline-start: 0.75rem;
+        font-size: var(--sl-text-sm);
+        font-weight: normal;
+        color: var(--sl-color-gray-3);
+    }
+    .mypage progress {
+        width: 100%;
+        height: 0.5rem;
+        accent-color: var(--sl-color-accent);
+    }
+    .mypage ul {
+        list-style: none;
+        padding: 0;
+    }
+    .mypage li {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .mypage li.done .mark {
+        color: var(--sl-color-text-accent);
+        font-weight: 700;
+    }
+</style>
