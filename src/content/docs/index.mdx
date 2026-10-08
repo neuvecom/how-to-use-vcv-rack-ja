@@ -1,5 +1,5 @@
 ---
-title: ホーム
+title: VCV Rack をゼロから学ぶ日本語ガイド
 description: DTM がまったく初めての人でもわかる、VCV Rack の日本語ハウツーサイト
 template: splash
 banner:
@@ -12,21 +12,43 @@ hero:
     - text: はじめる
       link: /intro/
       icon: right-arrow
+    - text: 基本編へ
+      link: /basics/install/
+      variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## このサイトについて
+
+「ゼロからの VCV Rack」は、DTM やシンセサイザーにまったく触れたことがない人に向けた、VCV Rack の日本語ハウツーサイトです。VCV Rack は、パソコンの中で本物のモジュラーシンセ（ユーロラック）を再現できる無料のソフトウェアです。専門用語はできるだけかみくだいて、実際に音を出しながら一歩ずつ進めます。
+
+## 学べること
 
 <CardGrid stagger>
     <Card title="はじめに" icon="open-book">
-        モジュラーシンセって何？をやさしく説明します。
+        モジュラーシンセって何？をやさしく説明します。[読む →](/intro/)
     </Card>
     <Card title="基本編" icon="setting">
-        インストールから最初の音を出すまで、VCV Rack の操作を一歩ずつ。
+        インストールから最初の音を出すまで、VCV Rack の操作を一歩ずつ。[読む →](/basics/install/)
     </Card>
     <Card title="モジュール解説" icon="puzzle">
-        モジュールごとに「何をするもの？」「つまみの意味」を解説します。
+        モジュールごとに「何をするもの？」「つまみの意味」を解説します。[読む →](/modules/)
     </Card>
     <Card title="ワークショップ" icon="star">
-        Lunar シリーズを使って、アンビエント曲を 1 曲作ります。
+        Lunar シリーズを使って、アンビエント曲を 1 曲作ります。[読む →](/workshop-lunar/)
     </Card>
 </CardGrid>
+
+## ログインすると進み具合を記録できます
+
+記事はログインしなくてもすべて読めます。Google アカウントかメールアドレスでログインすると、基本編やワークショップのレッスンごとに「完了」を記録でき、マイページで進み具合をひと目で確認できます。
+
+<CardGrid>
+    <LinkCard title="ログイン" description="Google アカウントまたはメールアドレスでログインします" href="/login/" />
+    <LinkCard title="用語集" description="わからない言葉が出てきたらここで確認できます" href="/glossary/" />
+</CardGrid>
+
+---
+
+<small>本サイトは VCV（開発元）とは関係のない非公式サイトです。ご利用にあたっては[利用規約](/terms/)と[プライバシーポリシー](/privacy/)をご確認ください。</small>
