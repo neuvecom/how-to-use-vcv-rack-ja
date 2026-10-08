@@ -15,6 +15,8 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
                 <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
                 <button type="submit">ログインリンクを送る</button>
             </form>
+
+            <p class="legal">ログインすると、<a href="/terms/">利用規約</a>と<a href="/privacy/">プライバシーポリシー</a>に同意したものとみなします。</p>
         </section>
 
         <section data-when="signed-in" hidden>
@@ -100,6 +102,10 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 <style>
     .login [hidden] {
         display: none;
+    }
+    .login .legal {
+        font-size: var(--sl-text-sm);
+        color: var(--sl-color-gray-3);
     }
     .login form {
         display: flex;

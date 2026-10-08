@@ -1,5 +1,5 @@
 ---
-// レッスンページの末尾に「完了」ボタン、全ページの末尾に Ko-fi バナーを付ける（Starlight の Footer を置き換え）
+// レッスンページの末尾に「完了」ボタン、全ページの末尾に Ko-fi バナーと規約へのリンクを付ける（Starlight の Footer を置き換え）
 import Default from '@astrojs/starlight/components/Footer.astro';
 import KofiBanner from './KofiBanner.astro';
 import { isLesson } from '../lib/courses';
@@ -23,6 +23,10 @@ const showProgress = isLesson(lessonId);
 }
 <KofiBanner />
 <Default />
+<nav class="legal-links" aria-label="規約">
+    <a href="/terms/">利用規約</a>
+    <a href="/privacy/">プライバシーポリシー</a>
+</nav>
 
 <script>
     import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -88,6 +92,15 @@ const showProgress = isLesson(lessonId);
 </script>
 
 <style>
+    .legal-links {
+        display: flex;
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+        font-size: var(--sl-text-xs);
+    }
+    .legal-links a {
+        color: var(--sl-color-gray-3);
+    }
     .lesson-progress {
         margin-top: 3rem;
         padding: 1rem 1.25rem;
