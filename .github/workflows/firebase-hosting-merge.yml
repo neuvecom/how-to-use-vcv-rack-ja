@@ -1,28 +1,25 @@
-# main へのマージ時に本番サイトへデプロイする
-name: Deploy to Firebase Hosting (本番)
+# 旧 URL（how-to-use-vcv-rack-ja.web.app）を neuve.com へ 301 転送する設定を Firebase Hosting に反映する
+# サイト本体は GitHub Pages（deploy.yml）で公開している
+name: Deploy redirect to Firebase Hosting
 
 on:
     push:
         branches:
             - main
+        paths:
+            - firebase.json
+            - firebase-redirect/**
+            - .github/workflows/firebase-hosting-merge.yml
+    workflow_dispatch:
 
 permissions:
     contents: read
 
 jobs:
-    build_and_deploy:
+    deploy_redirect:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: npm
-
-            - run: npm ci
-
-            - run: npm run build
 
             - uses: FirebaseExtended/action-hosting-deploy@v0
               with:

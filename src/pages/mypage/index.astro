@@ -1,0 +1,18 @@
+---
+// mypage は全コース共通のポータルへ移ったので、旧 URL から転送する
+const target = 'https://neuve.com/learn/mypage/';
+---
+
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="refresh" content={`0; url=${target}`} />
+        <meta name="robots" content="noindex" />
+        <link rel="canonical" href={target} />
+        <title>移動しました</title>
+    </head>
+    <body>
+        <p><a href={target}>{target}</a> へ移動しました。</p>
+    </body>
+</html>
