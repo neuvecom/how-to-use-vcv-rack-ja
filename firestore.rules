@@ -29,9 +29,12 @@ service cloud.firestore {
         allow create, update: if isOwner(uid)
           && isCourse(courseId)
           && lessonId.size() <= 300
-          && request.resource.data.keys().hasOnly(['completedAt'])
+          && request.resource.data.keys().hasOnly(['completedAt', 'local'])
           && request.resource.data.completedAt is timestamp
-          && request.resource.data.completedAt <= request.time;
+          && request.resource.data.completedAt <= request.time
+          // local: コースが端末（localStorage）に保存していた値。別の端末で復元するために使う
+          && (!('local' in request.resource.data)
+            || (request.resource.data.local is string && request.resource.data.local.size() <= 4000));
       }
     }
 
