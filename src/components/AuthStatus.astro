@@ -1,63 +1,42 @@
 ---
 // ヘッダー右側にログイン状態を表示する（Starlight の SocialIcons を置き換え）
+// ログイン・マイページは全コース共通のポータル（neuve.com/learn/）にあり、<neuve-auth> がそこへ案内する
 import Default from '@astrojs/starlight/components/SocialIcons.astro';
 ---
 
 <Default />
-<div class="auth-status" data-auth-status>
-    <a href="/login/" data-when="signed-out" hidden>ログイン</a>
-    <span data-when="signed-in" hidden>
-        <a href="/mypage/">マイページ</a>
-        <button type="button" data-sign-out>ログアウト</button>
-    </span>
-</div>
+<neuve-auth class="auth-status"></neuve-auth>
 
-<script>
-    import { onAuthStateChanged, signOut } from 'firebase/auth';
-    import { auth } from '../lib/firebase';
+<script is:inline type="module">
+    // 旧データの移行: 以前は users/{uid}/progress/{lessonId} に保存していた完了記録を、
+    // 全コース共通の users/{uid}/courses/vcv-rack/lessons/{lessonId} へ 1 回だけ移す
+    import { collection, doc, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+    import { db, onUser } from 'https://neuve.com/learn/kit/neuve-learn.js';
 
-    const root = document.querySelector<HTMLElement>('[data-auth-status]');
-    if (root) {
-        const signedOut = root.querySelector<HTMLElement>('[data-when="signed-out"]')!;
-        const signedIn = root.querySelector<HTMLElement>('[data-when="signed-in"]')!;
-        onAuthStateChanged(auth, (user) => {
-            signedOut.hidden = Boolean(user);
-            signedIn.hidden = !user;
-        });
-        root.querySelector('[data-sign-out]')?.addEventListener('click', async () => {
-            await signOut(auth);
-            location.href = '/';
-        });
-    }
+    onUser(async (user) => {
+        if (!user) return;
+        try {
+            const legacy = await getDocs(collection(db, 'users', user.uid, 'progress'));
+            if (legacy.empty) return;
+            const batch = writeBatch(db);
+            legacy.docs.forEach((d) => {
+                batch.set(doc(db, 'users', user.uid, 'courses', 'vcv-rack', 'lessons', d.id), {
+                    completedAt: d.data().completedAt,
+                });
+                batch.delete(d.ref);
+            });
+            await batch.commit();
+        } catch (error) {
+            console.error('旧進捗データの移行に失敗しました', error);
+        }
+    });
 </script>
 
 <style>
     .auth-status {
-        display: flex;
-        align-items: center;
+        display: inline-flex;
         font-size: var(--sl-text-sm);
-        white-space: nowrap;
-    }
-    .auth-status span {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-    .auth-status [hidden] {
-        display: none;
-    }
-    .auth-status a,
-    .auth-status button {
-        color: var(--sl-color-text-accent);
-        text-decoration: none;
-        background: none;
-        border: none;
-        padding: 0;
-        font: inherit;
-        cursor: pointer;
-    }
-    .auth-status a:hover,
-    .auth-status button:hover {
-        color: var(--sl-color-white);
+        --neuve-auth-color: var(--sl-color-text-accent);
+        --neuve-auth-hover: var(--sl-color-white);
     }
 </style>

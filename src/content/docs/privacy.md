@@ -30,14 +30,16 @@ lastUpdated: 2026-10-08
 
 ## 3. 外部サービスの利用
 
-本サイトは、ログインとデータの保存に Google LLC が提供する **Firebase**（Firebase Authentication、Cloud Firestore、Firebase Hosting）を利用しています。取得した情報は Firebase のサーバーに保存され、Google のプライバシーポリシーに従って管理されます。
+本サイトは、ログインとデータの保存に Google LLC が提供する **Firebase**（Firebase Authentication、Cloud Firestore）を利用しています。取得した情報は Firebase のサーバーに保存され、Google のプライバシーポリシーに従って管理されます。
 
 - [Firebase におけるプライバシーとセキュリティ](https://firebase.google.com/support/privacy)
 - [Google プライバシーポリシー](https://policies.google.com/privacy?hl=ja)
 
 また、各ページ下部の支援バナーは Ko-fi（Ko-fi Labs Limited）への外部リンクで、バナーの表示にはファイル配信サービス jsDelivr を利用しています。バナーを表示する際、閲覧者の IP アドレスなどの接続情報が jsDelivr に送られます。
 
-学習の進捗データは、ログインしている本人だけが読み書きできるよう、アクセスを制限しています。
+本サイトのページは GitHub Pages（GitHub, Inc.）から配信しています。
+
+ログインと学習の進捗データは、neuve.com で公開している他の学習コース（[コース一覧](https://neuve.com/learn/)）と共通です。どのコースでログインしても同じアカウントになり、マイページで各コースの進み具合をまとめて確認できます。学習の進捗データは、ログインしている本人だけが読み書きできるよう、アクセスを制限しています。
 
 ## 4. ブラウザへの保存（Cookie など）
 
