@@ -10,7 +10,7 @@ service cloud.firestore {
 
     // 進捗を記録できるコース（ポータルの src/data/courses.ts と合わせる）
     function isCourse(courseId) {
-      return courseId in ['analytics', 'github', 'claude-code', 'vcv-rack', 'korg-gadget'];
+      return courseId in ['analytics', 'github', 'claude-code', 'vcv-rack', 'korg-gadget', 'rust'];
     }
 
     // コースごとの要約（最後に完了したレッスン）
