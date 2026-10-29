@@ -1,15 +1,43 @@
 rules_version = '2';
 
+// neuve 学習コース共通の進捗データ
 // 各ユーザーは自分の進捗だけを読み書きできる
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // 進捗を記録できるコース（ポータルの src/data/courses.ts と合わせる）
+    function isCourse(courseId) {
+      return courseId in ['analytics', 'github', 'claude-code', 'vcv-rack', 'korg-gadget'];
+    }
+
+    // コースごとの要約（最後に完了したレッスン）
+    match /users/{uid}/courses/{courseId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && isCourse(courseId)
+        && request.resource.data.keys().hasOnly(['lastLessonId', 'updatedAt'])
+        && request.resource.data.lastLessonId is string
+        && request.resource.data.lastLessonId.size() <= 300
+        && request.resource.data.updatedAt == request.time;
+
+      // レッスンごとの完了記録
+      match /lessons/{lessonId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && isCourse(courseId)
+          && lessonId.size() <= 300
+          && request.resource.data.keys().hasOnly(['completedAt'])
+          && request.resource.data.completedAt is timestamp
+          && request.resource.data.completedAt <= request.time;
+      }
+    }
+
+    // 旧形式（VCV Rack コース単独時代）の完了記録。新形式へ移すため読み取りと削除だけ許可する
     match /users/{uid}/progress/{lessonId} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null
-        && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['lessonId', 'completedAt'])
-        && request.resource.data.lessonId is string
-        && request.resource.data.completedAt == request.time;
+      allow read, delete: if isOwner(uid);
     }
   }
 }
